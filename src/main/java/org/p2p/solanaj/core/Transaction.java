@@ -55,6 +55,24 @@ public class Transaction {
         }
     }
 
+    public void sign(List<Account> signers, Account feePayer) {
+
+        if (signers.size() == 0) {
+            throw new IllegalArgumentException("No signers");
+        }
+
+        message.setFeePayer(feePayer);
+
+        serializedMessage = message.serialize();
+
+        for (Account signer : signers) {
+            TweetNaclFast.Signature signatureProvider = new TweetNaclFast.Signature(new byte[0], signer.getSecretKey());
+            byte[] signature = signatureProvider.detached(serializedMessage);
+
+            signatures.add(Base58.encode(signature));
+        }
+    }
+
     public byte[] serialize() {
         int signaturesSize = signatures.size();
         byte[] signaturesLength = ShortvecEncoding.encodeLength(signaturesSize);

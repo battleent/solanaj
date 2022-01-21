@@ -1,30 +1,19 @@
 package org.p2p.solanaj.rpc;
 
-import java.util.*;
-import java.util.stream.Collectors;
 import org.p2p.solanaj.core.Account;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.Transaction;
 import org.p2p.solanaj.rpc.types.*;
-import org.p2p.solanaj.rpc.types.config.BlockConfig;
-import org.p2p.solanaj.rpc.types.ConfirmedSignFAddr2;
-import org.p2p.solanaj.rpc.types.DataSize;
-import org.p2p.solanaj.rpc.types.Filter;
-import org.p2p.solanaj.rpc.types.Memcmp;
-import org.p2p.solanaj.rpc.types.config.LargestAccountConfig;
-import org.p2p.solanaj.rpc.types.config.LeaderScheduleConfig;
-import org.p2p.solanaj.rpc.types.config.ProgramAccountConfig;
-import org.p2p.solanaj.rpc.types.config.RpcEpochConfig;
 import org.p2p.solanaj.rpc.types.RpcResultTypes.ValueLong;
-import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig;
+import org.p2p.solanaj.rpc.types.TokenResultObjects.TokenAccount;
+import org.p2p.solanaj.rpc.types.TokenResultObjects.TokenAmountInfo;
+import org.p2p.solanaj.rpc.types.config.*;
 import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
-import org.p2p.solanaj.rpc.types.config.SignatureStatusConfig;
-import org.p2p.solanaj.rpc.types.config.SimulateTransactionConfig;
-import org.p2p.solanaj.rpc.types.TokenResultObjects.*;
-import org.p2p.solanaj.rpc.types.config.Commitment;
-import org.p2p.solanaj.rpc.types.config.VoteAccountConfig;
 import org.p2p.solanaj.ws.SubscriptionWebSocketClient;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RpcApi {
     private RpcClient client;
@@ -75,8 +64,27 @@ public class RpcApi {
         return client.call("sendTransaction", params, String.class);
     }
 
+    public String sendTransaction(Transaction transaction, List<Account> signers, Account feePayer, String recentBlockHash)
+            throws RpcException {
+        if (recentBlockHash == null) {
+            recentBlockHash = getRecentBlockhash();
+        }
+        transaction.setRecentBlockHash(recentBlockHash);
+        transaction.sign(signers, feePayer);
+        byte[] serializedTransaction = transaction.serialize();
+
+        String base64Trx = Base64.getEncoder().encodeToString(serializedTransaction);
+
+        List<Object> params = new ArrayList<Object>();
+
+        params.add(base64Trx);
+        params.add(new RpcSendTransactionConfig());
+
+        return client.call("sendTransaction", params, String.class);
+    }
+
     public void sendAndConfirmTransaction(Transaction transaction, List<Account> signers,
-            NotificationEventListener listener) throws RpcException {
+                                          NotificationEventListener listener) throws RpcException {
         String signature = sendTransaction(transaction, signers, null);
 
         SubscriptionWebSocketClient subClient = SubscriptionWebSocketClient.getInstance(client.getEndpoint());
@@ -109,7 +117,7 @@ public class RpcApi {
         return client.call("getConfirmedTransaction", params, ConfirmedTransaction.class);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<SignatureInformation> getConfirmedSignaturesForAddress2(PublicKey account, int limit)
             throws RpcException {
         List<Object> params = new ArrayList<Object>();
@@ -139,7 +147,7 @@ public class RpcApi {
         return getProgramAccounts(account, new ProgramAccountConfig(Encoding.base64));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<ProgramAccount> getProgramAccounts(PublicKey account, ProgramAccountConfig programAccountConfig)
             throws RpcException {
         List<Object> params = new ArrayList<Object>();
@@ -160,7 +168,7 @@ public class RpcApi {
         return result;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<ProgramAccount> getProgramAccounts(PublicKey account, List<Memcmp> memcmpList, int dataSize)
             throws RpcException {
         List<Object> params = new ArrayList<>();
@@ -187,7 +195,7 @@ public class RpcApi {
         return result;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public List<ProgramAccount> getProgramAccounts(PublicKey account, List<Memcmp> memcmpList) throws RpcException {
         List<Object> params = new ArrayList<>();
 
@@ -470,6 +478,7 @@ public class RpcApi {
 
     /**
      * Returns information about the current epoch
+     *
      * @return
      * @throws RpcException
      */
@@ -662,6 +671,7 @@ public class RpcApi {
         params = (end == null ? Arrays.asList(start) : Arrays.asList(start, end));
         return this.client.call("getConfirmedBlocks", params, List.class);
     }
+
     /**
      * Returns a list of confirmed blocks between two slots
      * DEPRECATED: use getBlocks instead
@@ -700,7 +710,7 @@ public class RpcApi {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
-        Map<String, Object> rawResult =  client.call("getTokenSupply", params, Map.class);
+        Map<String, Object> rawResult = client.call("getTokenSupply", params, Map.class);
 
         return new TokenAmountInfo((AbstractMap) rawResult.get("value"));
     }
@@ -728,17 +738,17 @@ public class RpcApi {
     }
 
     public TokenAccountInfo getTokenAccountsByOwner(PublicKey accountOwner, Map<String, Object> requiredParams,
-            Map<String, Object> optionalParams) throws RpcException {
+                                                    Map<String, Object> optionalParams) throws RpcException {
         return getTokenAccount(accountOwner, requiredParams, optionalParams, "getTokenAccountsByOwner");
     }
 
     public TokenAccountInfo getTokenAccountsByDelegate(PublicKey accountDelegate, Map<String, Object> requiredParams,
-            Map<String, Object> optionalParams) throws RpcException {
+                                                       Map<String, Object> optionalParams) throws RpcException {
         return getTokenAccount(accountDelegate, requiredParams, optionalParams, "getTokenAccountsByDelegate");
     }
 
     private TokenAccountInfo getTokenAccount(PublicKey account, Map<String, Object> requiredParams,
-            Map<String, Object> optionalParams, String method) throws RpcException {
+                                             Map<String, Object> optionalParams, String method) throws RpcException {
         List<Object> params = new ArrayList<>();
         params.add(account.toString());
 
