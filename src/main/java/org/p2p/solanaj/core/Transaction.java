@@ -16,6 +16,7 @@ public class Transaction {
     private Message message;
     private List<String> signatures;
     private byte[] serializedMessage;
+    private String transactionHash;
 
     public Transaction() {
         this.message = new Message();
@@ -72,5 +73,9 @@ public class Transaction {
         out.put(serializedMessage);
 
         return out.array();
+    }
+
+    public String getTransactionHash() {
+        return signatures.get(0);
     }
 }
