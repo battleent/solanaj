@@ -64,25 +64,6 @@ public class RpcApi {
         return client.call("sendTransaction", params, String.class);
     }
 
-    public String sendTransaction(Transaction transaction, List<Account> signers, Account feePayer, String recentBlockHash)
-            throws RpcException {
-        if (recentBlockHash == null) {
-            recentBlockHash = getRecentBlockhash();
-        }
-        transaction.setRecentBlockHash(recentBlockHash);
-        transaction.sign(signers, feePayer);
-        byte[] serializedTransaction = transaction.serialize();
-
-        String base64Trx = Base64.getEncoder().encodeToString(serializedTransaction);
-
-        List<Object> params = new ArrayList<Object>();
-
-        params.add(base64Trx);
-        params.add(new RpcSendTransactionConfig());
-
-        return client.call("sendTransaction", params, String.class);
-    }
-
     public void sendAndConfirmTransaction(Transaction transaction, List<Account> signers,
                                           NotificationEventListener listener) throws RpcException {
         String signature = sendTransaction(transaction, signers, null);
