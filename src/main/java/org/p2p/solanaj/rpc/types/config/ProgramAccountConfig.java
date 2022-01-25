@@ -1,8 +1,8 @@
 package org.p2p.solanaj.rpc.types.config;
 
-import java.util.List;
-
 import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
+
+import java.util.List;
 
 public class ProgramAccountConfig {
 
@@ -18,5 +18,10 @@ public class ProgramAccountConfig {
 
     public ProgramAccountConfig(Encoding encoding) {
         this.encoding = encoding;
+    }
+
+    public ProgramAccountConfig(Encoding encoding, List<Object> filters) {
+        this.encoding = encoding;
+        this.filters = filters;
     }
 }
