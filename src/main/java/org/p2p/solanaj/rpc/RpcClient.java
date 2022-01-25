@@ -40,7 +40,7 @@ public class RpcClient {
         this.endpoint = endpoint;
         this.httpClient = new OkHttpClient.Builder()
                 .readTimeout(20, TimeUnit.SECONDS)
-                //.addInterceptor(new LoggingInterceptor())
+                .addInterceptor(new LoggingInterceptor())
                 .build();
         rpcApi = new RpcApi(this);
     }
