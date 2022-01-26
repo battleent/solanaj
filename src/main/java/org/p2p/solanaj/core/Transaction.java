@@ -1,13 +1,13 @@
 package org.p2p.solanaj.core;
 
+import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.ShortvecEncoding;
+import org.p2p.solanaj.utils.TweetNaclFast;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.bitcoinj.core.Base58;
-import org.p2p.solanaj.utils.ShortvecEncoding;
-import org.p2p.solanaj.utils.TweetNaclFast;
 
 public class Transaction {
 
@@ -16,6 +16,7 @@ public class Transaction {
     private Message message;
     private List<String> signatures;
     private byte[] serializedMessage;
+    private String transactionHash;
 
     public Transaction() {
         this.message = new Message();
@@ -72,5 +73,9 @@ public class Transaction {
         out.put(serializedMessage);
 
         return out.array();
+    }
+
+    public String getTransactionHash() {
+        return signatures.get(0);
     }
 }
