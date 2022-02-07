@@ -72,7 +72,7 @@ public class TokenMetadataProgram extends Program {
                     ByteUtils.lengthToByteArray(i + 1),
                     creators.get(i).publicKey.toByteArray(),
                     ByteBuffer.allocate(1).order(ByteOrder.LITTLE_ENDIAN).put(verified).array(),
-                    ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).put(share).array()
+                    ByteBuffer.allocate(1).order(ByteOrder.LITTLE_ENDIAN).put(share).array()
             );
         }
         data = Bytes.concat(data, ByteBuffer.allocate(1).order(ByteOrder.LITTLE_ENDIAN).put((byte) (isMutable ? 1 : 0)).array());
