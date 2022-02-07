@@ -18,7 +18,7 @@ public class TokenProgram extends Program {
     public static final PublicKey PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
     private static final PublicKey SYSVAR_RENT_PUBKEY = new PublicKey("SysvarRent111111111111111111111111111111111");
 
-    private static final int INITIALIZE_MINT_METHOD_ID = 1;
+    private static final int INITIALIZE_MINT_METHOD_ID = 0;
     private static final int INITIALIZE_METHOD_ID = 1;
     private static final int TRANSFER_METHOD_ID = 3;
     private static final int CLOSE_ACCOUNT_METHOD_ID = 9;
